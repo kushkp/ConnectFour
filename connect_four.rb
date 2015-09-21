@@ -3,6 +3,17 @@ require_relative 'player'
 require 'byebug'
 
 class ConnectFour
+  def self.create_game
+    puts "Enter num of columns, height, and number of discs in a row to win or 'd' for default (ie. '6,7,4'): >"
+    board_vals = gets.chomp
+    if board_vals == "d"
+      game = ConnectFour.new()
+    else
+      board_vals = board_vals.split(',').map(&:to_i)
+      game = ConnectFour.new(board_vals)
+    end
+  end
+
   def initialize(board_vals = [6,7,4])
     @cols = board_vals.first
     @player1 = Player.new(:x)
@@ -60,14 +71,5 @@ end
 
 #run game
 if __FILE__ == $PROGRAM_NAME
-  puts "Enter num of columns, height, and number of discs in a row to win or 'd' for default (ie. '6,7,4'): >"
-  board_vals = gets.chomp
-  if board_vals == "d"
-    game = ConnectFour.new()
-  else
-    board_vals = board_vals.split(',').map(&:to_i)
-    game = ConnectFour.new(board_vals)
-  end
-
-  game.play
+  ConnectFour.create_game.play
 end

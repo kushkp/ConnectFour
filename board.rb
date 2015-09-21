@@ -12,7 +12,10 @@ class Board
     curr_height = col_height(col)
     return false if curr_height == height
     @grid[height - curr_height - 1][col] = disc
-    # debugger
+  end
+
+  def has_space?(col)
+    col_height(col) < height
   end
 
   def on_board?(row, col)
@@ -25,14 +28,13 @@ class Board
 
   def render
     content = ""
-    num_cols.times do |col_num|
-      content << " #{col_num}"
-    end
+    num_cols.times { |col_num| content << " #{col_num}" }
     content << "\n"
+
     @grid.each do |row|
       content << "|"
       row.each do |pos|
-        content << (pos || " ") << "|"
+          content << (pos || " ") << "|"
       end
       content << "\n"
     end
@@ -47,10 +49,6 @@ class Board
   end
 
 private
-  def diagonal_winner
-    check_diagonal(true) || check_diagonal(false)
-  end
-
   def check_diagonal(pos)
     #if pos = true => check positive slope diagonal /
     #if pos = false => check negative slope diagonal \
@@ -63,16 +61,11 @@ private
     start_locs.each do |row, col|
       diagonal = []
       while on_board?(row, col)
-        begin
-          diagonal << @grid[row][col]
-        rescue
-          byebug
-        end
-
-        # diagonal << @grid[row][col]
+        diagonal << @grid[row][col]
         row += 1
         col += pos ? 1 : -1
       end
+      
       diagonals << diagonal
     end
 
@@ -84,7 +77,16 @@ private
       winner = in_a_row(line)
       return winner unless winner.nil?
     end
+
     nil
+  end
+
+  def col_height(col)
+    @grid.transpose[col].compact.length
+  end
+
+  def diagonal_winner
+    check_diagonal(true) || check_diagonal(false)
   end
 
   def in_a_row(line)
@@ -94,13 +96,10 @@ private
       first_disc = line[idx]
       next if first_disc.nil?
       if line[idx...(idx + num_to_win)].all? { |el| el == first_disc }
-        return first_disc #change to player
+        return first_disc
       end
     end
-    nil
-  end
 
-  def col_height(col)
-    @grid.transpose[col].compact.length
+    nil
   end
 end

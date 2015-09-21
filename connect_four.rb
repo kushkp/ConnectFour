@@ -4,36 +4,59 @@ require 'byebug'
 
 class ConnectFour
   def initialize(board_vals = [6,7,4])
+    @cols = board_vals.first
     @player1 = Player.new(:x)
     @player2 = Player.new(:o)
     @players = [@player1, @player2]
     @board = Board.new(*board_vals)
   end
 
-  def change_turn
-    @players.reverse!
+  def current_player
+    players.first
   end
 
   def play
-    until @board.over?
+    until board.over?
       take_turn
       change_turn
     end
-    @board.render
-    puts "#{@players.last} wins!"
+    board.render
+    puts "#{players.last} wins!"
+  end
+
+private
+  attr_reader :cols, :players, :board
+
+  def change_turn
+    players.reverse!
+  end
+
+  def print_error_msg
+    puts "Invalid column. Please choose an empty column on the board."
+  end
+
+  def prompt
+    puts "Which column do you want to place the mark in?"
+    col = gets.chomp.to_i
   end
 
   def take_turn
-    @board.render
-    puts "Enter Column: >"
-    col = gets.to_i
-    unless @board.drop_disc(@players.first, col)
-      puts "Error: that column is already full!"
-      take_turn
+    board.render
+    col = prompt
+    until col && valid_input?(col)
+      print_error_msg
+      col = prompt
     end
+
+    board.drop_disc(current_player.mark, col)
+  end
+
+  def valid_input?(col)
+    col.is_a?(Integer) &&
+      col.between?(0, cols - 1) &&
+      board.has_space?(col)
   end
 end
-
 
 #run game
 if __FILE__ == $PROGRAM_NAME
@@ -42,7 +65,7 @@ if __FILE__ == $PROGRAM_NAME
   if board_vals == "d"
     game = ConnectFour.new()
   else
-    board_vals = input.split(',')
+    board_vals = board_vals.split(',').map(&:to_i)
     game = ConnectFour.new(board_vals)
   end
 

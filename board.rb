@@ -2,7 +2,8 @@ class Board
   def initialize(cols, height, num_to_win)
     @num_cols = cols
     @height = height
-    @grid = Array.new(cols) { Array.new(height) { :O } }
+    @num_to_win = num_to_win
+    @grid = Array.new(cols) { Array.new(height) { :. } }
   end
 
   def drop_disc(disc, col)
@@ -16,6 +17,19 @@ class Board
     !!winner
   end
 
+  def render
+    content = ""
+    @grid.each do |row|
+      content << "|"
+      row.each do |pos|
+        content << (pos || " ") << "|"
+      end
+      content << "\n"
+    end
+
+    puts content
+  end
+
   def winner
     check_lines(@grid) ||
       check_lines(@grid.transpose) ||
@@ -23,7 +37,7 @@ class Board
   end
 
 private
-  attr_reader :num_cols, :height
+  attr_reader :num_cols, :height, :num_to_win
 
   def diagonal_winner
     check_diagonal(true) || check_diagonal(false)
@@ -50,4 +64,27 @@ private
     check_lines(diagonals)
   end
 
+  def check_lines(lines)
+    lines.each do |line|
+      winner = in_a_row(line)
+      return winner unless winner.nil?
+    end
+    nil
+  end
+
+  def in_a_row(line)
+    return nil if line.length < num_to_win
+    (0..(line.length - num_to_win)).each do |idx|
+      first_disc = line[idx]
+      next if first_disc.nil?
+      if line[idx...(idx + num_to_win)].all? { |el| el == first_disc }
+        return first_disc #change to player
+      end
+    end
+    nil
+  end
+
+  def column_height(col)
+    @grid.transpose[col].compact.length
+  end
 end

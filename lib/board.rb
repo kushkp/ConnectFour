@@ -1,5 +1,6 @@
 class Board
-  attr_reader :num_cols, :height, :num_to_win
+  attr_reader :num_cols, :height, :num_to_win, :grid
+  #grid reader created for unit testing only
 
   def initialize(cols, height, num_to_win)
     @num_cols = cols
@@ -65,7 +66,7 @@ private
         row += 1
         col += pos ? 1 : -1
       end
-      
+
       diagonals << diagonal
     end
 
@@ -92,7 +93,7 @@ private
   def in_a_row(line)
     return nil if line.length < num_to_win
     (0..(line.length - num_to_win)).each do |idx|
-      return nil if line[idx] == :-
+      return nil if line[idx].nil?
       first_disc = line[idx]
       next if first_disc.nil?
       if line[idx...(idx + num_to_win)].all? { |el| el == first_disc }

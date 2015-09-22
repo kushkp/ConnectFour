@@ -11,6 +11,11 @@ class Board
     @last_disc = nil
     @winner = nil
     @grid = Array.new(height) { Array.new(cols) {} }
+
+    @start_row = nil
+    @end_row = nil
+    @start_col = nil
+    @end_col = nil
   end
 
   def drop_disc(disc, col)
@@ -48,6 +53,11 @@ class Board
     puts content
     puts "winner: #{winner}"
     puts "last disc: #{last_disc}"
+    puts "start_row: #{@start_row}"
+    puts "end_row: #{@end_row}"
+    puts "start_col: #{@start_col}"
+    puts "end_col: #{@end_col}"
+
   end
 
   def update_winner
@@ -60,27 +70,56 @@ private
   attr_writer :grid, :winner
   attr_accessor :last_disc
 
+  # def check_diagonal(pos)
+  #   #if pos = true => check positive slope diagonal /
+  #   #if pos = false => check negative slope diagonal \
+  #   start_col = pos ? 0 : (num_cols - 1)
+  #   diagonals = []
+  #
+  #   start_locs = (0...num_cols).map { |col| [0, col] }
+  #   start_locs += (1...height).map { |row| [row, start_col] }
+  #
+  #   start_locs.each do |row, col|
+  #     diagonal = []
+  #     while on_board?(row, col)
+  #       diagonal << grid[row][col]
+  #       row += 1
+  #       col += pos ? 1 : -1
+  #     end
+  #
+  #     diagonals << diagonal
+  #   end
+  #
+  #   check_lines(diagonals)
+  # end
+
   def check_diagonal(pos)
-    #if pos = true => check positive slope diagonal /
-    #if pos = false => check negative slope diagonal \
-    start_col = pos ? 0 : (num_cols - 1)
-    diagonals = []
+    row, col = last_disc
+    start_col = col - num_to_win
+    start_col = 0 if start_col < 0
+    end_col = col + num_to_win
+    end_col = num_cols if end_col > num_cols
 
-    start_locs = (0...num_cols).map { |col| [0, col] }
-    start_locs += (1...height).map { |row| [row, start_col] }
-
-    start_locs.each do |row, col|
-      diagonal = []
-      while on_board?(row, col)
-        diagonal << grid[row][col]
-        row += 1
-        col += pos ? 1 : -1
-      end
-
-      diagonals << diagonal
+    if pos
+      start_row = row + num_to_win
+      start_row = height - 1 if start_row > height - 1
+    else
+      # debugger
+      start_row = row - num_to_win
+      start_row = 0 if row - num_to_win < 0
     end
+    dir = pos ? -1 : 1
 
-    check_lines(diagonals)
+    diagonal = []
+    testarr = []
+    (start_col..end_col).to_a.each do |col|
+      # debugger
+      testarr << [start_row, col] if on_board?(start_row, col)
+      diagonal << grid[start_row][col] if on_board?(start_row, col)
+      start_row += dir
+    end
+    p testarr
+    in_a_row(diagonal)
   end
 
   def check_lines(lines)
@@ -112,9 +151,9 @@ private
     row, col = horizontal ? last_disc : last_disc.reverse
     offset = num_to_win
     min = col - offset
-    min = min < 0 ? 0 : min
+    min = 0 if min < 0
     max = col + offset
-    max = max > upper_bound ? upper_bound : max
+    max = upper_bound if max > upper_bound
 
     [matrix[row][min...max]]
   end

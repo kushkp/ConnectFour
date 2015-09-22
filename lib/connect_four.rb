@@ -26,7 +26,7 @@ class ConnectFour
   end
 
   def play
-    until board.over?
+    until board.winner
       take_turn
       change_turn
     end
@@ -59,6 +59,7 @@ private
     end
 
     board.drop_disc(current_player.mark, col)
+    board.update_winner
   end
 
   def valid_input?(col)

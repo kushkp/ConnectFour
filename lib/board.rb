@@ -1,18 +1,23 @@
+require 'byebug'
+
 class Board
-  attr_reader :num_cols, :height, :num_to_win, :grid
+  attr_reader :num_cols, :height, :num_to_win, :grid, :winner
   #grid reader created for unit testing only
 
   def initialize(cols, height, num_to_win)
     @num_cols = cols
     @height = height
     @num_to_win = num_to_win
+    @last_disc = nil
+    @winner = nil
     @grid = Array.new(height) { Array.new(cols) {} }
   end
 
   def drop_disc(disc, col)
     curr_height = col_height(col)
     return false if curr_height == height
-    @grid[height - curr_height - 1][col] = disc
+    self.grid[height - curr_height - 1][col] = disc
+    self.last_disc = [height - curr_height - 1, col]
   end
 
   def has_space?(col)
@@ -32,7 +37,7 @@ class Board
     num_cols.times { |col_num| content << " #{col_num}" }
     content << "\n"
 
-    @grid.each do |row|
+    grid.each do |row|
       content << "|"
       row.each do |pos|
           content << (pos || " ") << "|"
@@ -41,15 +46,20 @@ class Board
     end
 
     puts content
+    puts "winner: #{winner}"
+    puts "last disc: #{last_disc}"
   end
 
-  def winner
-    check_lines(@grid) ||
-      check_lines(@grid.transpose) ||
+  def update_winner
+    self.winner = check_lines(horizontal_line) ||
+      check_lines(vertical_line) ||
       diagonal_winner
   end
 
 private
+  attr_writer :grid, :winner
+  attr_accessor :last_disc
+
   def check_diagonal(pos)
     #if pos = true => check positive slope diagonal /
     #if pos = false => check negative slope diagonal \
@@ -62,7 +72,7 @@ private
     start_locs.each do |row, col|
       diagonal = []
       while on_board?(row, col)
-        diagonal << @grid[row][col]
+        diagonal << grid[row][col]
         row += 1
         col += pos ? 1 : -1
       end
@@ -83,17 +93,35 @@ private
   end
 
   def col_height(col)
-    @grid.transpose[col].compact.length
+    grid.transpose[col].compact.length
   end
 
   def diagonal_winner
     check_diagonal(true) || check_diagonal(false)
   end
 
+  def horizontal_line
+    create_line(grid, num_cols, true)
+  end
+
+  def vertical_line
+    create_line(grid.transpose, height, false)
+  end
+
+  def create_line(matrix, upper_bound, horizontal)
+    row, col = horizontal ? last_disc : last_disc.reverse
+    offset = num_to_win
+    min = col - offset
+    min = min < 0 ? 0 : min
+    max = col + offset
+    max = max > upper_bound ? upper_bound : max
+
+    [matrix[row][min...max]]
+  end
+
   def in_a_row(line)
-    return nil if line.length < num_to_win
+    return nil if line.compact.length < num_to_win
     (0..(line.length - num_to_win)).each do |idx|
-      return nil if line[idx].nil?
       first_disc = line[idx]
       next if first_disc.nil?
       if line[idx...(idx + num_to_win)].all? { |el| el == first_disc }

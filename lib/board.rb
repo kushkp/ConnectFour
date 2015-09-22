@@ -11,11 +11,6 @@ class Board
     @last_disc = nil
     @winner = nil
     @grid = Array.new(height) { Array.new(cols) {} }
-
-    @start_row = nil
-    @end_row = nil
-    @start_col = nil
-    @end_col = nil
   end
 
   def drop_disc(disc, col)
@@ -51,13 +46,6 @@ class Board
     end
 
     puts content
-    puts "winner: #{winner}"
-    puts "last disc: #{last_disc}"
-    puts "start_row: #{@start_row}"
-    puts "end_row: #{@end_row}"
-    puts "start_col: #{@start_col}"
-    puts "end_col: #{@end_col}"
-
   end
 
   def update_winner

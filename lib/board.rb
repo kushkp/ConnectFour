@@ -70,56 +70,27 @@ private
   attr_writer :grid, :winner
   attr_accessor :last_disc
 
-  # def check_diagonal(pos)
-  #   #if pos = true => check positive slope diagonal /
-  #   #if pos = false => check negative slope diagonal \
-  #   start_col = pos ? 0 : (num_cols - 1)
-  #   diagonals = []
-  #
-  #   start_locs = (0...num_cols).map { |col| [0, col] }
-  #   start_locs += (1...height).map { |row| [row, start_col] }
-  #
-  #   start_locs.each do |row, col|
-  #     diagonal = []
-  #     while on_board?(row, col)
-  #       diagonal << grid[row][col]
-  #       row += 1
-  #       col += pos ? 1 : -1
-  #     end
-  #
-  #     diagonals << diagonal
-  #   end
-  #
-  #   check_lines(diagonals)
-  # end
-
   def check_diagonal(pos)
-    row, col = last_disc
-    start_col = col - num_to_win
-    start_col = 0 if start_col < 0
-    end_col = col + num_to_win
-    end_col = num_cols if end_col > num_cols
+    #if pos = true => check positive slope diagonal /
+    #if pos = false => check negative slope diagonal \
+    start_col = pos ? 0 : (num_cols - 1)
+    diagonals = []
 
-    if pos
-      start_row = row + num_to_win
-      start_row = height - 1 if start_row > height - 1
-    else
-      # debugger
-      start_row = row - num_to_win
-      start_row = 0 if row - num_to_win < 0
-    end
-    dir = pos ? -1 : 1
+    start_locs = (0...num_cols).map { |col| [0, col] }
+    start_locs += (1...height).map { |row| [row, start_col] }
 
-    diagonal = []
-    testarr = []
-    (start_col..end_col).to_a.each do |col|
-      # debugger
-      testarr << [start_row, col] if on_board?(start_row, col)
-      diagonal << grid[start_row][col] if on_board?(start_row, col)
-      start_row += dir
+    start_locs.each do |row, col|
+      diagonal = []
+      while on_board?(row, col)
+        diagonal << grid[row][col]
+        row += 1
+        col += pos ? 1 : -1
+      end
+
+      diagonals << diagonal
     end
-    p testarr
-    in_a_row(diagonal)
+
+    check_lines(diagonals)
   end
 
   def check_lines(lines)
